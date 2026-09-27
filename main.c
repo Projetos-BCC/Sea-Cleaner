@@ -1,10 +1,12 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
+#include <string.h>
 
 int main(void) {
     al_init();
     al_init_primitives_addon();
     al_install_mouse();
+    al_install_keyboard();
 
     int largura_tela = 800;
     int altura_tela = 900;
@@ -23,6 +25,11 @@ int main(void) {
         al_get_timer_event_source(timer)
     );
 
+    al_register_event_source(
+        fila_eventos,
+        al_get_keyboard_event_source()
+    );
+
     int rodando = 1;
 
     struct Lixeira {
@@ -36,10 +43,14 @@ int main(void) {
     struct Lixeira lixeira;
 
     lixeira.largura = 100;
-    lixeira.altura = 100;
+    lixeira.altura = 120;
 
     lixeira.x = 400;
     lixeira.y = 700;
+
+    strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Papel");
+
+    ALLEGRO_COLOR cor;
 
     ALLEGRO_MOUSE_STATE mouse;
 
@@ -54,6 +65,26 @@ int main(void) {
             if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
             {
                 rodando = 0;
+            }
+
+            if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
+
+                if (evento.keyboard.keycode == ALLEGRO_KEY_Q) {
+                    strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Papel");
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_W) {
+                    strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Plastico");
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_E) {
+                    strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Vidro");
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_R) {
+                    strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Metal");
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_T) {
+                    strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Organico");
+                }
+
             }
 
             if (evento.type == ALLEGRO_EVENT_TIMER)
@@ -71,14 +102,29 @@ int main(void) {
                 if (lixeira.x < 0) {
                     lixeira.x = 0;
                 }
-               
 
                 al_clear_to_color(al_map_rgb(0, 0, 0));
+
+                if (strcmp(lixeira.tipo, "Papel") == 0) {
+                    cor = al_map_rgb(0, 0, 255);
+                }
+                else if (strcmp(lixeira.tipo, "Plastico") == 0) {
+                    cor = al_map_rgb(255, 0, 0);
+                }
+                else if (strcmp(lixeira.tipo, "Vidro") == 0) {
+                    cor = al_map_rgb(0, 255, 0);
+                }
+                else if (strcmp(lixeira.tipo, "Metal") == 0) {
+                    cor = al_map_rgb(255, 255, 0);
+                }
+                else if (strcmp(lixeira.tipo, "Organico") == 0) {
+                    cor = al_map_rgb(137, 81, 41);
+                }
 
                 al_draw_filled_rectangle(
                     lixeira.x, lixeira.y,
                     lixeira.x + lixeira.largura, lixeira.y + lixeira.altura,
-                    al_map_rgb(0, 255, 0)
+                    cor
                 );
 
                 al_flip_display();

@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{b876174a-e270-4dcf-b8d6-028847a0e9b5}</ProjectGuid>
+    <ProjectGuid>{B876174A-E270-4DCF-B8D6-028847A0E9B5}</ProjectGuid>
     <RootNamespace>SeaCleaner</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
