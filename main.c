@@ -25,11 +25,21 @@ int main(void) {
 
     int rodando = 1;
 
-    float largura_lixeira = 100;
-    float altura_lixeira = 100;
+    struct Lixeira {
+        char tipo[10];
+        float x;
+        float y;
+        int largura;
+        int altura;
+    };
 
-    float x = 350;
-    float y = 650;
+    struct Lixeira lixeira;
+
+    lixeira.largura = 100;
+    lixeira.altura = 100;
+
+    lixeira.x = 400;
+    lixeira.y = 700;
 
     ALLEGRO_MOUSE_STATE mouse;
 
@@ -50,18 +60,24 @@ int main(void) {
             {
                 al_get_mouse_state(&mouse);
 
-                x = mouse.x;
+                lixeira.x = mouse.x - lixeira.largura/2;
 
-                if (x > largura_tela - largura_lixeira)
+                if (lixeira.x > largura_tela - lixeira.largura)
                 {
-                    x = largura_tela - largura_lixeira;
+                    lixeira.x = largura_tela - lixeira.largura;
+
                 }
+
+                if (lixeira.x < 0) {
+                    lixeira.x = 0;
+                }
+               
 
                 al_clear_to_color(al_map_rgb(0, 0, 0));
 
                 al_draw_filled_rectangle(
-                    x, y,
-                    x + largura_lixeira, y + altura_lixeira,
+                    lixeira.x, lixeira.y,
+                    lixeira.x + lixeira.largura, lixeira.y + lixeira.altura,
                     al_map_rgb(0, 255, 0)
                 );
 
