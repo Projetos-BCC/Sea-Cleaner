@@ -1,11 +1,22 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 
 struct Lixeira {
     char tipo[10];
     float x;
     float y;
+    int largura;
+    int altura;
+};
+
+struct Lixo {
+    char tipo[10];
+    float x;
+    float y;
+    float velocidade;
     int largura;
     int altura;
 };
@@ -79,6 +90,80 @@ void exibeLixeira(struct Lixeira lixeira) {
     );
 }
 
+void tipoLixo(struct Lixo* lixo) {
+    int tipoRand = rand() % 5;
+
+    if (tipoRand == 0) {
+        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Papel");
+    }
+    else if (tipoRand == 1) {
+        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Plastico");
+    }
+    else if (tipoRand == 2) {
+        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Vidro");
+    }
+    else if (tipoRand == 3) {
+        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Metal");
+    }
+    else
+    {
+        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Organico");
+    }
+}
+
+void inicializaLixo(struct Lixo lixos[], int max_lixos) {
+    for (int i = 0; i < max_lixos; i++) {
+        lixos[i].largura = 50;
+        lixos[i].altura = 70;
+        lixos[i].velocidade = 3;
+        lixos[i].x = rand() % (largura_tela - lixos[i].largura);
+
+        if (i == 0) {
+            lixos[i].y = 0;
+        }
+        else {
+            int distancia = 100 + rand() % 301;
+            lixos[i].y = lixos[i - 1].y - distancia;
+        }
+        tipoLixo(&lixos[i]);
+    }
+}
+
+void dropLixo(struct Lixo* lixo) {
+
+    ALLEGRO_COLOR cor;
+
+    if (strcmp(lixo->tipo, "Papel") == 0) {
+        cor = al_map_rgb(0, 0, 255);
+    }
+    else if (strcmp(lixo->tipo, "Plastico") == 0) {
+        cor = al_map_rgb(255, 0, 0);
+    }
+    else if (strcmp(lixo->tipo, "Vidro") == 0) {
+        cor = al_map_rgb(0, 255, 0);
+    }
+    else if (strcmp(lixo->tipo, "Metal") == 0) {
+        cor = al_map_rgb(255, 255, 0);
+    }
+    else if (strcmp(lixo->tipo, "Organico") == 0) {
+        cor = al_map_rgb(137, 81, 41);
+    }
+
+    al_draw_filled_rectangle(
+        lixo->x, lixo->y,
+        lixo->x + lixo->largura, lixo->y + lixo->altura,
+        cor
+    );
+
+    lixo->y += lixo->velocidade;
+
+    if (lixo->y > altura_tela) {
+        int distancia = (100 + rand() % 301);
+        lixo->y = -distancia;
+        lixo->x = rand() % (largura_tela - lixo->largura);
+        tipoLixo(lixo);
+    }
+}
 
 
 int main(void) {
@@ -116,6 +201,14 @@ int main(void) {
 
     strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Papel");
 
+    srand(time(NULL));
+    
+    int max_lixos = 6;
+
+    struct Lixo lixos[6];
+
+    inicializaLixo(lixos, max_lixos);
+
     al_start_timer(timer);
 
     int rodando = 1;
@@ -145,6 +238,11 @@ int main(void) {
                 movimentarLixeira(&lixeira);
 
                 exibeLixeira(lixeira);
+
+                for (int i = 0; i < max_lixos; i++) {
+                    dropLixo(&lixos[i]);
+                }
+                
 
                 al_flip_display();
             }
