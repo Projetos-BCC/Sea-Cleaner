@@ -1,5 +1,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_font.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
@@ -46,19 +48,19 @@ void movimentarLixeira(struct Lixeira* lixeira) {
 }
 
 void trocarTipoLixeira(struct Lixeira* lixeira, int tecla) {
-    if (tecla == ALLEGRO_KEY_Q) {
+    if (tecla == ALLEGRO_KEY_A) {
         strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Papel");
     }
-    else if (tecla == ALLEGRO_KEY_W) {
+    else if (tecla == ALLEGRO_KEY_S) {
         strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Plastico");
     }
-    else if (tecla == ALLEGRO_KEY_E) {
+    else if (tecla == ALLEGRO_KEY_D) {
         strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Vidro");
     }
-    else if (tecla == ALLEGRO_KEY_R) {
+    else if (tecla == ALLEGRO_KEY_F) {
         strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Metal");
     }
-    else if (tecla == ALLEGRO_KEY_T) {
+    else if (tecla == ALLEGRO_KEY_SPACE) {
         strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Organico");
     }
 }
@@ -113,8 +115,8 @@ void tipoLixo(struct Lixo* lixo) {
 
 void inicializaLixo(struct Lixo lixos[], int max_lixos) {
     for (int i = 0; i < max_lixos; i++) {
-        lixos[i].largura = 50;
-        lixos[i].altura = 70;
+        lixos[i].largura = 30;
+        lixos[i].altura = 50;
         lixos[i].velocidade = 3;
         lixos[i].x = rand() % (largura_tela - lixos[i].largura);
 
@@ -156,12 +158,39 @@ void dropLixo(struct Lixo* lixo) {
     );
 
     lixo->y += lixo->velocidade;
+}
+
+void colisao(struct Lixo *lixo, struct Lixeira lixeira, int *pontuacao, int *erros, int *rodando) {
+    if (lixo->x + lixo->largura > lixeira.x && lixo->x < lixeira.x + lixeira.largura && lixo->y + lixo->altura > lixeira.y && lixo->y < lixeira.y + lixeira.altura) {
+        if (strcmp(lixo->tipo, lixeira.tipo) == 0) {
+            (*pontuacao)++;
+            int distancia = (100 + rand() % 301);
+            lixo->y = -distancia;
+            lixo->x = rand() % (largura_tela - lixo->largura);
+            tipoLixo(lixo);
+        }
+        else {   
+
+            (*erros)++;
+            int distancia = (100 + rand() % 301);
+            lixo->y = -distancia;
+            lixo->x = rand() % (largura_tela - lixo->largura);
+            tipoLixo(lixo);
+
+            
+        }
+    }
 
     if (lixo->y > altura_tela) {
+        (*erros)++;
         int distancia = (100 + rand() % 301);
         lixo->y = -distancia;
         lixo->x = rand() % (largura_tela - lixo->largura);
         tipoLixo(lixo);
+    }
+
+    if (*erros >= 5) {
+        *rodando = 0;
     }
 }
 
@@ -171,10 +200,12 @@ int main(void) {
     al_init_primitives_addon();
     al_install_mouse();
     al_install_keyboard();
+    al_init_font_addon();
 
     ALLEGRO_DISPLAY* janela = al_create_display(largura_tela, altura_tela);
     ALLEGRO_EVENT_QUEUE* fila_eventos = al_create_event_queue();
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
+    ALLEGRO_FONT* fonte = al_create_builtin_font();
 
     al_register_event_source(
         fila_eventos,
@@ -204,10 +235,12 @@ int main(void) {
     srand(time(NULL));
     
     int max_lixos = 6;
-
     struct Lixo lixos[6];
 
     inicializaLixo(lixos, max_lixos);
+
+    int pontuacao = 0;
+    int erros = 0;
 
     al_start_timer(timer);
 
@@ -241,14 +274,72 @@ int main(void) {
 
                 for (int i = 0; i < max_lixos; i++) {
                     dropLixo(&lixos[i]);
-                }
-                
 
+                    colisao(&lixos[i], lixeira, &pontuacao, &erros, &rodando);
+                }
+
+                al_draw_textf(
+                    fonte,
+                    al_map_rgb(255, 255, 255),
+                    10, 10,
+                    0,
+                    "Pontos: %d",
+                    pontuacao
+                ); 
+
+                al_draw_textf(
+                    fonte,
+                    al_map_rgb(255, 255, 255),
+                    10, 30,
+                    0,
+                    "Erros: %d/5",
+                    erros
+                );
+
+                al_draw_textf(
+                    fonte,
+                    al_map_rgb(0, 0, 255),
+                    10, 50,
+                    0,
+                    "A = Papel"
+                );
+                al_draw_textf(
+                    fonte,
+                    al_map_rgb(255, 0, 0),
+                    10, 60,
+                    0,
+                    "S = Plastico"
+                );
+                al_draw_textf(
+                    fonte,
+                    al_map_rgb(0, 255, 0),
+                    10, 70,
+                    0,
+                    "D = Vidro"
+                );
+                al_draw_textf(
+                    fonte,
+                    al_map_rgb(255, 255, 0),
+                    10, 80,
+                    0,
+                    "F = Metal"
+                );
+                al_draw_textf(
+                    fonte,
+                    al_map_rgb(137, 81, 41),
+                    10, 90,
+                    0,
+                    "Espaco = Organico"
+                );
+                
                 al_flip_display();
             }
         }
     }
 
+    printf("Sua pontuacao: %d\n", pontuacao);
+
+    al_destroy_font(fonte);
     al_destroy_timer(timer);
     al_destroy_event_queue(fila_eventos);
     al_destroy_display(janela);
