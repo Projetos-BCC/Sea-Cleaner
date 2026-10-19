@@ -1,6 +1,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_image.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -102,29 +103,36 @@ void trocarTipoLixeira(struct Lixeira* lixeira, int tecla) {
     }
 }
 
-void exibeLixeira(struct Lixeira lixeira) {
-    ALLEGRO_COLOR cor;
+void exibeLixeira(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_lixeiras) {
+
+    float src_x = 0;
+    float src_y = 0;
+    float largura_recorte = 291;
+    float altura_recorte = 365;
 
     if (strcmp(lixeira.tipo, "Papel") == 0) {
-        cor = al_map_rgb(0, 0, 255);
-    }
-    else if (strcmp(lixeira.tipo, "Plastico") == 0) {
-        cor = al_map_rgb(255, 0, 0);
+        src_x = 370; src_y = 147;
     }
     else if (strcmp(lixeira.tipo, "Vidro") == 0) {
-        cor = al_map_rgb(0, 255, 0);
+        src_x = 798; src_y = 147;
     }
     else if (strcmp(lixeira.tipo, "Metal") == 0) {
-        cor = al_map_rgb(255, 255, 0);
+        src_x = 144; src_y = 601;
+    }
+    else if (strcmp(lixeira.tipo, "Plastico") == 0) {
+        src_x = 585; src_y = 601;
     }
     else if (strcmp(lixeira.tipo, "Organico") == 0) {
-        cor = al_map_rgb(137, 81, 41);
+        src_x = 1033; src_y = 601;
     }
 
-    al_draw_filled_rectangle(
+    al_draw_scaled_bitmap(
+        sprite_lixeiras,
+        src_x, src_y,
+        largura_recorte, altura_recorte,
         lixeira.x, lixeira.y,
-        lixeira.x + lixeira.largura, lixeira.y + lixeira.altura,
-        cor
+        lixeira.largura, lixeira.altura,
+        0
     );
 }
 
@@ -232,11 +240,13 @@ int main(void) {
     al_install_mouse();
     al_install_keyboard();
     al_init_font_addon();
+    al_init_image_addon();
 
     ALLEGRO_DISPLAY* janela = al_create_display(largura_tela, altura_tela);
     ALLEGRO_EVENT_QUEUE* fila_eventos = al_create_event_queue();
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
     ALLEGRO_FONT* fonte = al_create_builtin_font();
+    ALLEGRO_BITMAP* sprite_lixeiras = al_load_bitmap("images/lixeiras2d.png");
 
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
@@ -282,7 +292,7 @@ int main(void) {
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
             movimentarLixeira(&lixeira);
-            exibeLixeira(lixeira);
+            exibeLixeira(lixeira, sprite_lixeiras);
 
             for (int i = 0; i < max_lixos; i++) {
                 dropLixo(&lixos[i]);
@@ -304,11 +314,14 @@ int main(void) {
 
     printf("Sua pontuacao: %d\n", pontuacao);
 
+    if (sprite_lixeiras) {
+        al_destroy_bitmap(sprite_lixeiras);
+    }
+
     al_destroy_font(fonte);
     al_destroy_timer(timer);
     al_destroy_event_queue(fila_eventos);
     al_destroy_display(janela);
 
     return 0;
-
 }
