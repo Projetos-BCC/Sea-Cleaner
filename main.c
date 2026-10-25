@@ -40,14 +40,18 @@ int main(void) {
     al_init_font_addon();
     al_init_image_addon();
 
+    
+
+    ALLEGRO_DISPLAY* janela = al_create_display(largura_tela, altura_tela);
+
+    al_set_new_bitmap_flags(ALLEGRO_NO_PRESERVE_TEXTURE);
     ALLEGRO_BITMAP* sprite_lixeiras = al_load_bitmap("images/lixeiras2d.png");
     ALLEGRO_BITMAP* sprite_lixos = al_load_bitmap("images/lixos2d.png");
 
-    ALLEGRO_DISPLAY* janela = al_create_display(largura_tela, altura_tela);
     ALLEGRO_EVENT_QUEUE* fila_eventos = al_create_event_queue();
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
     ALLEGRO_FONT* fonte = al_create_builtin_font();
-    
+    al_set_new_bitmap_flags(0);
 
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
@@ -135,6 +139,8 @@ int main(void) {
                     colisao(lixos, i, max_lixos, lixeira, &pontuacao, &erros);
                 }
 
+                exibeBarraLixeiras(lixeira, sprite_lixeiras, fonte);
+
                 if (erros >= 5) {
                     estado = ESTADO_GAMEOVER;
                 }
@@ -143,11 +149,6 @@ int main(void) {
                 al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 30, 0, "Pontos: %d", pontuacao);
                 al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 50, 0, "Erros: %d/5", erros);
 
-                al_draw_textf(fonte, al_map_rgb(0, 0, 255), 10, 70, 0, "A = Papel");
-                al_draw_textf(fonte, al_map_rgb(255, 0, 0), 10, 80, 0, "S = Plastico");
-                al_draw_textf(fonte, al_map_rgb(0, 255, 0), 10, 90, 0, "D = Vidro");
-                al_draw_textf(fonte, al_map_rgb(255, 255, 0), 10, 100, 0, "F = Metal");
-                al_draw_textf(fonte, al_map_rgb(137, 81, 41), 10, 110, 0, "Espaco = Organico");
             }
             else if (estado == ESTADO_GAMEOVER) {
                 al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "GAME OVER");
