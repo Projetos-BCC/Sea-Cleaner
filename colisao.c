@@ -46,17 +46,17 @@ void posicionarLixoSeguro(struct Lixo lixos[], int i, int max_lixos, int inicial
     } while (colidiu);
 }
 
-void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira lixeira, int* pontuacao, int* erros) {
+void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira *lixeira, int* pontuacao) {
     struct Lixo* lixo = &lixos[i];
 
-    if (lixo->x + lixo->largura > lixeira.x && lixo->x < lixeira.x + lixeira.largura &&
-        lixo->y + lixo->altura > lixeira.y && lixo->y < lixeira.y + lixeira.altura) {
+    if (lixo->x + lixo->largura > lixeira->x && lixo->x < lixeira->x + lixeira->largura &&
+        lixo->y + lixo->altura > lixeira->y && lixo->y < lixeira->y + lixeira->altura) {
 
-        if (strcmp(lixo->tipo, lixeira.tipo) == 0) {
+        if (strcmp(lixo->tipo, lixeira->tipo) == 0) {
             (*pontuacao)++;
         }
         else {
-            (*erros)++;
+            lixeira->vida -= 2;
         }
 
         int distancia = (200 + rand() % 251);
@@ -66,7 +66,7 @@ void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira lixeira, 
     }
 
     if (lixo->y > altura_tela) {
-        (*erros)++;
+        lixeira->vida -= 1;
         int distancia = (200 + rand() % 251);
         lixo->y = -distancia;
         tipoLixo(lixo);

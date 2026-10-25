@@ -10,6 +10,7 @@ struct Lixeira {
     float y;
     int largura;
     int altura;
+    int vida;
 };
 
 void movimentarLixeira(struct Lixeira* lixeira);

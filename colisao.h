@@ -8,6 +8,6 @@
 
 int colideHitboxExterna(struct Lixo lixo1, struct Lixo lixo2);
 void posicionarLixoSeguro(struct Lixo lixos[], int i, int max_lixos, int inicializador);
-void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira lixeira, int* pontuacao, int* erros);
+void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira *lixeira, int* pontuacao);
 
 #endif

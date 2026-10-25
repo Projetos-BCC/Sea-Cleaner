@@ -18,14 +18,14 @@ estadoJogo estado = ESTADO_MENU;
 int largura_tela = 800;
 int altura_tela = 900;
 
-void reiniciarPartida(int *pontuacao, int *erros, struct Lixeira *lixeira, struct Lixo lixos[], int max_lixos, int *highScore) {
+void reiniciarPartida(int *pontuacao, struct Lixeira *lixeira, struct Lixo lixos[], int max_lixos, int *highScore) {
 
        if (*pontuacao > *highScore) {
             *highScore = *pontuacao;
         }
     
     *pontuacao = 0;
-    *erros = 0;
+    lixeira->vida = 10;
 
     strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Papel");
 
@@ -33,6 +33,8 @@ void reiniciarPartida(int *pontuacao, int *erros, struct Lixeira *lixeira, struc
 }
 
 int main(void) {
+
+    //INICIACAO ADDONS DO ALLEGRO
     al_init();
     al_init_primitives_addon();
     al_install_mouse();
@@ -40,39 +42,43 @@ int main(void) {
     al_init_font_addon();
     al_init_image_addon();
 
-    
-
     ALLEGRO_DISPLAY* janela = al_create_display(largura_tela, altura_tela);
 
+    //INICIALIZACAO DOS SPRITES
     al_set_new_bitmap_flags(ALLEGRO_NO_PRESERVE_TEXTURE);
     ALLEGRO_BITMAP* sprite_lixeiras = al_load_bitmap("images/lixeiras2d.png");
     ALLEGRO_BITMAP* sprite_lixos = al_load_bitmap("images/lixos2d.png");
+    al_set_new_bitmap_flags(0);
+
 
     ALLEGRO_EVENT_QUEUE* fila_eventos = al_create_event_queue();
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
     ALLEGRO_FONT* fonte = al_create_builtin_font();
-    al_set_new_bitmap_flags(0);
+    
 
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
     al_register_event_source(fila_eventos, al_get_keyboard_event_source());
 
+
+    //INICIALIZACAO DA LIXEIRA
     struct Lixeira lixeira;
     lixeira.largura = 100;
     lixeira.altura = 120;
     lixeira.x = 400;
     lixeira.y = 700;
     strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Papel");
+    lixeira.vida = 10;
 
     srand(time(NULL));
 
+    //INICIALIZACAO DOS LIXOS
     int max_lixos = 6;
     struct Lixo lixos[6];
     inicializaLixo(lixos, max_lixos);
 
     int pontuacao = 0;
     int highScore = 0;
-    int erros = 0;
 
     al_start_timer(timer);
     int rodando = 1;
@@ -88,7 +94,7 @@ int main(void) {
         else if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
             if (estado == ESTADO_MENU) {
                 if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-                    reiniciarPartida(&pontuacao, &erros, &lixeira, lixos, max_lixos, &highScore);
+                    reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore);
                     estado = ESTADO_JOGANDO;
                 }
             }
@@ -108,7 +114,7 @@ int main(void) {
                 }
             } else if (estado == ESTADO_GAMEOVER) {
                 if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-                    reiniciarPartida(&pontuacao, &erros, &lixeira, lixos, max_lixos, &highScore);
+                    reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore);
                     estado = ESTADO_JOGANDO;
                 }
                 else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
@@ -136,18 +142,18 @@ int main(void) {
 
                 for (int i = 0; i < max_lixos; i++) {
                     dropLixo(&lixos[i], sprite_lixos);
-                    colisao(lixos, i, max_lixos, lixeira, &pontuacao, &erros);
+                    colisao(lixos, i, max_lixos, &lixeira, &pontuacao);
                 }
 
                 exibeBarraLixeiras(lixeira, sprite_lixeiras, fonte);
 
-                if (erros >= 5) {
+                if (lixeira.vida <= 0) {
                     estado = ESTADO_GAMEOVER;
                 }
 
                 al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 10, 0, "HighScore: %d", highScore);
                 al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 30, 0, "Pontos: %d", pontuacao);
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 50, 0, "Erros: %d/5", erros);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 50, 0, "Vida: %d", lixeira.vida);
 
             }
             else if (estado == ESTADO_GAMEOVER) {
