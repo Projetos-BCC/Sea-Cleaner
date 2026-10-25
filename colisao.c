@@ -53,10 +53,33 @@ void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira *lixeira,
         lixo->y + lixo->altura > lixeira->y && lixo->y < lixeira->y + lixeira->altura) {
 
         if (strcmp(lixo->tipo, lixeira->tipo) == 0) {
-            (*pontuacao)++;
+            *pontuacao += 1 * lixeira->multiplicador;
+            (lixeira->combo)++;
+
+            if (lixeira->combo >= 4 && lixeira->multiplicador == 1) {
+                lixeira->multiplicador = 2;
+                lixeira->combo = 0;
+            }
+
+            if (lixeira->combo >= 4 && lixeira->multiplicador == 2) {
+                lixeira->multiplicador = 3;
+                lixeira->combo = 0;
+            }
+
+            if (lixeira->combo >= 4 && lixeira->multiplicador == 3) {
+                lixeira->multiplicador = 4;
+                lixeira->combo = 0;
+            }
+
+            if (lixeira->combo >= 10 && lixeira->multiplicador == 4) {
+                lixeira->multiplicador = 8;
+                lixeira->combo = 0;
+            }
         }
         else {
             lixeira->vida -= 2;
+            lixeira->combo = 0;
+            lixeira->multiplicador = 1;
         }
 
         int distancia = (200 + rand() % 251);
@@ -67,6 +90,8 @@ void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira *lixeira,
 
     if (lixo->y > altura_tela) {
         lixeira->vida -= 1;
+        lixeira->combo = 0;
+        lixeira->multiplicador = 1;
         int distancia = (200 + rand() % 251);
         lixo->y = -distancia;
         tipoLixo(lixo);

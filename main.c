@@ -25,7 +25,9 @@ void reiniciarPartida(int *pontuacao, struct Lixeira *lixeira, struct Lixo lixos
         }
     
     *pontuacao = 0;
-    lixeira->vida = 10;
+    lixeira->vida = 6;
+    lixeira->combo = 0;
+    lixeira->multiplicador = 1;
 
     strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Papel");
 
@@ -68,7 +70,9 @@ int main(void) {
     lixeira.x = 400;
     lixeira.y = 700;
     strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Papel");
-    lixeira.vida = 10;
+    lixeira.vida = 6;
+    lixeira.combo = 0;
+    lixeira.multiplicador = 1;
 
     srand(time(NULL));
 
@@ -154,6 +158,8 @@ int main(void) {
                 al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 10, 0, "HighScore: %d", highScore);
                 al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 30, 0, "Pontos: %d", pontuacao);
                 al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 50, 0, "Vida: %d", lixeira.vida);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 70, 0, "Acertos consecutivos: %d", lixeira.combo);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 80, 0, "Multiplicador: %dX", lixeira.multiplicador);
 
             }
             else if (estado == ESTADO_GAMEOVER) {
@@ -181,6 +187,8 @@ int main(void) {
     }
 
     printf("Sua pontuacao: %d\n", pontuacao);
+    printf("Seu combo: %d\n", lixeira.combo);
+    printf("Seu multiplicador: %d\n", lixeira.multiplicador);
 
     al_destroy_font(fonte);
     al_destroy_timer(timer);

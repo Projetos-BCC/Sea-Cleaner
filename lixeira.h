@@ -11,6 +11,8 @@ struct Lixeira {
     int largura;
     int altura;
     int vida;
+    int combo;
+    int multiplicador;
 };
 
 void movimentarLixeira(struct Lixeira* lixeira);
