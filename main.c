@@ -18,7 +18,12 @@ estadoJogo estado = ESTADO_MENU;
 int largura_tela = 800;
 int altura_tela = 900;
 
-void reiniciarPartida(int *pontuacao, int *erros, struct Lixeira *lixeira, struct Lixo lixos[], int max_lixos) {
+void reiniciarPartida(int *pontuacao, int *erros, struct Lixeira *lixeira, struct Lixo lixos[], int max_lixos, int *highScore) {
+
+       if (*pontuacao > *highScore) {
+            *highScore = *pontuacao;
+        }
+    
     *pontuacao = 0;
     *erros = 0;
 
@@ -62,6 +67,7 @@ int main(void) {
     inicializaLixo(lixos, max_lixos);
 
     int pontuacao = 0;
+    int highScore = 0;
     int erros = 0;
 
     al_start_timer(timer);
@@ -78,18 +84,31 @@ int main(void) {
         else if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
             if (estado == ESTADO_MENU) {
                 if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+                    reiniciarPartida(&pontuacao, &erros, &lixeira, lixos, max_lixos, &highScore);
                     estado = ESTADO_JOGANDO;
-                    printf("Mudou para JOGANDO\n");
                 }
             }
             else if (estado == ESTADO_JOGANDO) {
                 trocarTipoLixeira(&lixeira, evento.keyboard.keycode);
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    estado = ESTADO_PAUSADO;
+                }
             }
-            else if (estado == ESTADO_GAMEOVER) {
+            else if (estado == ESTADO_PAUSADO) {
                 if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-                    reiniciarPartida(&pontuacao, &erros, &lixeira, lixos, max_lixos);
                     estado = ESTADO_JOGANDO;
-                    printf("Mudou para JOGANDO\n");
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    pontuacao = 0;
+                    estado = ESTADO_MENU;
+                }
+            } else if (estado == ESTADO_GAMEOVER) {
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+                    reiniciarPartida(&pontuacao, &erros, &lixeira, lixos, max_lixos, &highScore);
+                    estado = ESTADO_JOGANDO;
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    estado = ESTADO_MENU;
                 }
             }
             
@@ -120,19 +139,34 @@ int main(void) {
                     estado = ESTADO_GAMEOVER;
                 }
 
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 10, 0, "Pontos: %d", pontuacao);
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 30, 0, "Erros: %d/5", erros);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 10, 0, "HighScore: %d", highScore);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 30, 0, "Pontos: %d", pontuacao);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 50, 0, "Erros: %d/5", erros);
 
-                al_draw_textf(fonte, al_map_rgb(0, 0, 255), 10, 50, 0, "A = Papel");
-                al_draw_textf(fonte, al_map_rgb(255, 0, 0), 10, 60, 0, "S = Plastico");
-                al_draw_textf(fonte, al_map_rgb(0, 255, 0), 10, 70, 0, "D = Vidro");
-                al_draw_textf(fonte, al_map_rgb(255, 255, 0), 10, 80, 0, "F = Metal");
-                al_draw_textf(fonte, al_map_rgb(137, 81, 41), 10, 90, 0, "Espaco = Organico");
+                al_draw_textf(fonte, al_map_rgb(0, 0, 255), 10, 70, 0, "A = Papel");
+                al_draw_textf(fonte, al_map_rgb(255, 0, 0), 10, 80, 0, "S = Plastico");
+                al_draw_textf(fonte, al_map_rgb(0, 255, 0), 10, 90, 0, "D = Vidro");
+                al_draw_textf(fonte, al_map_rgb(255, 255, 0), 10, 100, 0, "F = Metal");
+                al_draw_textf(fonte, al_map_rgb(137, 81, 41), 10, 110, 0, "Espaco = Organico");
             }
             else if (estado == ESTADO_GAMEOVER) {
                 al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "GAME OVER");
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
-                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 50, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
+                if (pontuacao > highScore) {
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 50, ALLEGRO_ALIGN_CENTER, "NOVO RECORDE");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 90, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
+                }
+                else {
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 50, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
+                }        
+            }
+            else if (estado == ESTADO_PAUSADO) {
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "Jogo Pausado");
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 20, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para continuar jogando");
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 40, ALLEGRO_ALIGN_CENTER, "Pressione ESC para sair e voltar ao menu");
             }
 
             al_flip_display();

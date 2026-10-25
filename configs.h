@@ -7,7 +7,8 @@ extern int altura_tela;
 typedef enum {
 	ESTADO_MENU,
 	ESTADO_JOGANDO,
-	ESTADO_GAMEOVER
+	ESTADO_GAMEOVER,
+	ESTADO_PAUSADO
 } estadoJogo;
 
 #endif
