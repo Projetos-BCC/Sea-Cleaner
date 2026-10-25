@@ -43,6 +43,7 @@ void inicializaLixo(struct Lixo lixos[], int max_lixos) {
 }
 
 void dropLixo(struct Lixo* lixo, ALLEGRO_BITMAP* sprite_lixos) {
+    float escala = al_get_bitmap_width(sprite_lixos) / 1500.0f;
     float x_ini = 0, x_fim = 0, y_ini = 0, y_fim = 0;
 
     if (strcmp(lixo->tipo, "Papel") == 0) {
@@ -76,17 +77,18 @@ void dropLixo(struct Lixo* lixo, ALLEGRO_BITMAP* sprite_lixos) {
         else if (lixo->variacao_item == 4) { x_ini = 1283; x_fim = 1416; y_ini = 831;  y_fim = 918; }
     }
 
-    float largura_recorte = x_fim - x_ini;
-    float altura_recorte = y_fim - y_ini;
+    float largura_recorte = (x_fim - x_ini) * escala;
+    float altura_recorte = (y_fim - y_ini) * escala;
 
     al_draw_scaled_bitmap(
         sprite_lixos,
-        x_ini, y_ini,
+        x_ini * escala, y_ini * escala,
         largura_recorte, altura_recorte,
         lixo->x, lixo->y,
         lixo->largura, lixo->altura,
         0
     );
+
 
     lixo->y += lixo->velocidade;
 }

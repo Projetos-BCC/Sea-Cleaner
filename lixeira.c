@@ -36,6 +36,8 @@ void trocarTipoLixeira(struct Lixeira* lixeira, int tecla) {
 }
 
 void exibeLixeira(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_lixeiras) {
+    float escala = al_get_bitmap_width(sprite_lixeiras) / 1470.0f;
+
     float src_x = 0;
     float src_y = 0;
     float largura_recorte = 291;
@@ -59,8 +61,8 @@ void exibeLixeira(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_lixeiras) {
 
     al_draw_scaled_bitmap(
         sprite_lixeiras,
-        src_x, src_y,
-        largura_recorte, altura_recorte,
+        src_x * escala, src_y * escala,
+        largura_recorte * escala, altura_recorte * escala,
         lixeira.x, lixeira.y,
         lixeira.largura, lixeira.altura,
         0
