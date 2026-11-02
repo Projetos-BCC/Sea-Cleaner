@@ -89,6 +89,8 @@ void dropLixo(struct Lixo* lixo, ALLEGRO_BITMAP* sprite_lixos) {
         0
     );
 
+}
 
+void moverLixo(struct Lixo* lixo) {
     lixo->y += lixo->velocidade;
 }

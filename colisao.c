@@ -55,6 +55,7 @@ void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira *lixeira,
         if (strcmp(lixo->tipo, lixeira->tipo) == 0) {
             *pontuacao += 1 * lixeira->multiplicador;
             (lixeira->combo)++;
+            lixeira->acertos++;
 
             if (lixeira->combo >= 4 && lixeira->multiplicador == 1) {
                 lixeira->multiplicador = 2;

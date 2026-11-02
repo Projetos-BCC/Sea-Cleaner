@@ -13,6 +13,7 @@ struct Lixeira {
     int vida;
     int combo;
     int multiplicador;
+    int acertos;
 };
 
 void movimentarLixeira(struct Lixeira* lixeira);
