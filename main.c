@@ -1,262 +1,129 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_image.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 
-struct Lixeira {
-    char tipo[10];
-    float x;
-    float y;
-    int largura;
-    int altura;
-};
+//ARQUIVOS
+#include "configs.h"
+#include "lixeira.h"
+#include "lixo.h"
+#include "colisao.h"
 
-struct Lixo {
-    char tipo[10];
-    float x;
-    float y;
-    float velocidade;
-    int largura;
-    int altura;
-};
+estadoJogo estado = ESTADO_MENU;
 
 int largura_tela = 800;
 int altura_tela = 900;
 
-int colideHitboxExterna(struct Lixo lixo1, struct Lixo lixo2) {
-    int margem = 25;
+void reiniciarPartida(int *pontuacao, struct Lixeira *lixeira, struct Lixo lixos[], int max_lixos, int *highScore, int *aviso) {
 
-    float esquerda1 = lixo1.x - margem;
-    float direita1 = lixo1.x + lixo1.largura + margem;
-    float topo1 = lixo1.y - margem;
-    float baixo1 = lixo1.y + lixo1.altura + margem;
-
-    float esquerda2 = lixo2.x - margem;
-    float direita2 = lixo2.x + lixo2.largura + margem;
-    float topo2 = lixo2.y - margem;
-    float baixo2 = lixo2.y + lixo2.altura + margem;
-
-    if (direita1 > esquerda2 &&
-        esquerda1 < direita2 &&
-        baixo1 > topo2 &&
-        topo1 < baixo2) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}
-
-void posicionarLixoSeguro(struct Lixo lixos[], int index, int max_lixos) {
-    int colidiu;
-
-    do {
-        colidiu = 0;
-        lixos[index].x = rand() % (largura_tela - lixos[index].largura);
-
-        for (int j = 0; j < max_lixos; j++) {
-            if (index == j) continue;
-
-            if (colideHitboxExterna(lixos[index], lixos[j])) {
-                colidiu = 1;
-                break;
-            }
+       if (*pontuacao > *highScore) {
+            *highScore = *pontuacao;
         }
+    
+    *pontuacao = 0;
+    lixeira->vida = 10;
+    lixeira->combo = 0;
+    lixeira->multiplicador = 1;
+    lixeira->acertos = 0;
+    *aviso = 0;
 
-    } while (colidiu);
+    strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Papel");
+
+    inicializaLixo(lixos, max_lixos);
 }
 
-void movimentarLixeira(struct Lixeira* lixeira) {
-    ALLEGRO_MOUSE_STATE mouse;
-    al_get_mouse_state(&mouse);
+void definirFase(struct Lixeira* lixeira, int *fase, int *inicio, int *fim, int *velocidade) {
+    *fase = 1;
+    *inicio = 0;
+    *fim = 30;
+    *velocidade = 3;
 
-    lixeira->x = mouse.x - lixeira->largura / 2;
-
-    if (lixeira->x > largura_tela - lixeira->largura) {
-        lixeira->x = largura_tela - lixeira->largura;
+    if (lixeira->acertos >= 30) {
+        *fase = 2;
+        *inicio = 30;
+        *fim = 70;
+        *velocidade = 4;
     }
-
-    if (lixeira->x < 0) {
-        lixeira->x = 0;
+    if (lixeira->acertos >= 70) {
+        *fase = 3;
+        *inicio = 70;
+        *fim = 120;
+        *velocidade = 5;
     }
-}
-
-void trocarTipoLixeira(struct Lixeira* lixeira, int tecla) {
-    if (tecla == ALLEGRO_KEY_A) {
-        strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Papel");
+    if (lixeira->acertos >= 120) {
+        *fase = 4;
+        *inicio = 120;
+        *fim = 180;
+        *velocidade = 6;
     }
-    else if (tecla == ALLEGRO_KEY_S) {
-        strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Plastico");
-    }
-    else if (tecla == ALLEGRO_KEY_D) {
-        strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Vidro");
-    }
-    else if (tecla == ALLEGRO_KEY_F) {
-        strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Metal");
-    }
-    else if (tecla == ALLEGRO_KEY_SPACE) {
-        strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Organico");
-    }
-}
-
-void exibeLixeira(struct Lixeira lixeira) {
-    ALLEGRO_COLOR cor;
-
-    if (strcmp(lixeira.tipo, "Papel") == 0) {
-        cor = al_map_rgb(0, 0, 255);
-    }
-    else if (strcmp(lixeira.tipo, "Plastico") == 0) {
-        cor = al_map_rgb(255, 0, 0);
-    }
-    else if (strcmp(lixeira.tipo, "Vidro") == 0) {
-        cor = al_map_rgb(0, 255, 0);
-    }
-    else if (strcmp(lixeira.tipo, "Metal") == 0) {
-        cor = al_map_rgb(255, 255, 0);
-    }
-    else if (strcmp(lixeira.tipo, "Organico") == 0) {
-        cor = al_map_rgb(137, 81, 41);
-    }
-
-    al_draw_filled_rectangle(
-        lixeira.x, lixeira.y,
-        lixeira.x + lixeira.largura, lixeira.y + lixeira.altura,
-        cor
-    );
-}
-
-void tipoLixo(struct Lixo* lixo) {
-    int tipoRand = rand() % 5;
-
-    if (tipoRand == 0) {
-        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Papel");
-    }
-    else if (tipoRand == 1) {
-        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Plastico");
-    }
-    else if (tipoRand == 2) {
-        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Vidro");
-    }
-    else if (tipoRand == 3) {
-        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Metal");
-    }
-    else {
-        strcpy_s(lixo->tipo, sizeof(lixo->tipo), "Organico");
-    }
-}
-
-void inicializaLixo(struct Lixo lixos[], int max_lixos) {
-    for (int i = 0; i < max_lixos; i++) {
-        lixos[i].largura = 30;
-        lixos[i].altura = 50;
-        lixos[i].velocidade = 3;
-
-        if (i == 0) {
-            lixos[i].y = 0;
-        }
-        else {
-            int distancia = 100 + rand() % 301;
-            lixos[i].y = lixos[i - 1].y - distancia;
-        }
-        tipoLixo(&lixos[i]);
-        posicionarLixoSeguro(lixos, i, max_lixos);
-    }
-}
-
-void dropLixo(struct Lixo* lixo) {
-    ALLEGRO_COLOR cor;
-
-    if (strcmp(lixo->tipo, "Papel") == 0) {
-        cor = al_map_rgb(0, 0, 255);
-    }
-    else if (strcmp(lixo->tipo, "Plastico") == 0) {
-        cor = al_map_rgb(255, 0, 0);
-    }
-    else if (strcmp(lixo->tipo, "Vidro") == 0) {
-        cor = al_map_rgb(0, 255, 0);
-    }
-    else if (strcmp(lixo->tipo, "Metal") == 0) {
-        cor = al_map_rgb(255, 255, 0);
-    }
-    else if (strcmp(lixo->tipo, "Organico") == 0) {
-        cor = al_map_rgb(137, 81, 41);
-    }
-
-    al_draw_filled_rectangle(
-        lixo->x, lixo->y,
-        lixo->x + lixo->largura, lixo->y + lixo->altura,
-        cor
-    );
-
-    lixo->y += lixo->velocidade;
-}
-
-void colisao(struct Lixo lixos[], int i, int max_lixos, struct Lixeira lixeira, int* pontuacao, int* erros, int* rodando) {
-    struct Lixo* lixo = &lixos[i];
-
-    if (lixo->x + lixo->largura > lixeira.x && lixo->x < lixeira.x + lixeira.largura &&
-        lixo->y + lixo->altura > lixeira.y && lixo->y < lixeira.y + lixeira.altura) {
-
-        if (strcmp(lixo->tipo, lixeira.tipo) == 0) {
-            (*pontuacao)++;
-        }
-        else {
-            (*erros)++;
-        }
-
-        int distancia = (100 + rand() % 301);
-        lixo->y = -distancia;
-        tipoLixo(lixo);
-        posicionarLixoSeguro(lixos, i, max_lixos);
-    }
-
-    if (lixo->y > altura_tela) {
-        (*erros)++;
-        int distancia = (100 + rand() % 301);
-        lixo->y = -distancia;
-        tipoLixo(lixo);
-        posicionarLixoSeguro(lixos, i, max_lixos);
-    }
-
-    if (*erros >= 5) {
-        *rodando = 0;
+    if (lixeira->acertos >= 180) {
+        *fase = 5;
+        *inicio = 180;
+        *fim = 250;
+        *velocidade = 7;
     }
 }
 
 int main(void) {
+
+    //INICIACAO ADDONS DO ALLEGRO
     al_init();
     al_init_primitives_addon();
     al_install_mouse();
     al_install_keyboard();
     al_init_font_addon();
+    al_init_image_addon();
 
     ALLEGRO_DISPLAY* janela = al_create_display(largura_tela, altura_tela);
+
+    //INICIALIZACAO DOS SPRITES
+    al_set_new_bitmap_flags(ALLEGRO_NO_PRESERVE_TEXTURE);
+    ALLEGRO_BITMAP* sprite_lixeiras = al_load_bitmap("images/lixeiras2d.png");
+    ALLEGRO_BITMAP* sprite_lixos = al_load_bitmap("images/lixos2d.png");
+    al_set_new_bitmap_flags(0);
+
+
     ALLEGRO_EVENT_QUEUE* fila_eventos = al_create_event_queue();
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
     ALLEGRO_FONT* fonte = al_create_builtin_font();
+    
 
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
     al_register_event_source(fila_eventos, al_get_keyboard_event_source());
 
+
+    //INICIALIZACAO DA LIXEIRA
     struct Lixeira lixeira;
     lixeira.largura = 100;
     lixeira.altura = 120;
     lixeira.x = 400;
     lixeira.y = 700;
     strcpy_s(lixeira.tipo, sizeof(lixeira.tipo), "Papel");
+    lixeira.vida = 10;
+    lixeira.combo = 0;
+    lixeira.multiplicador = 1;
+    lixeira.acertos = 0;
 
     srand(time(NULL));
 
+    //INICIALIZACAO DOS LIXOS
     int max_lixos = 6;
     struct Lixo lixos[6];
     inicializaLixo(lixos, max_lixos);
 
     int pontuacao = 0;
-    int erros = 0;
+    int highScore = 0;
+    int fase = 1;
+    int inicio = 0;
+    int fim = 30;
+    int velocidade = 3;
+    int fase_anterior = 1;
+    int aviso = 0;
 
     al_start_timer(timer);
     int rodando = 1;
@@ -270,7 +137,45 @@ int main(void) {
             rodando = 0;
         }
         else if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
-            trocarTipoLixeira(&lixeira, evento.keyboard.keycode);
+            if (estado == ESTADO_MENU) {
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+                    reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso);
+                    estado = ESTADO_JOGANDO;
+                }
+            }
+            else if (estado == ESTADO_JOGANDO) {
+                trocarTipoLixeira(&lixeira, evento.keyboard.keycode);
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    estado = ESTADO_PAUSADO;
+                }
+            }
+            else if (estado == ESTADO_PAUSADO) {
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+                    estado = ESTADO_JOGANDO;
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    pontuacao = 0;
+                    estado = ESTADO_MENU;
+                }
+            } else if (estado == ESTADO_GAMEOVER) {
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+                    reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso);
+                    estado = ESTADO_JOGANDO;
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    estado = ESTADO_MENU;
+                }
+            }
+            else if (estado == ESTADO_VITORIA) {
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+                    reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso);
+                    estado = ESTADO_JOGANDO;
+                }
+                else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                    estado = ESTADO_MENU;
+                }
+            }
+            
         }
         else if (evento.type == ALLEGRO_EVENT_TIMER) {
             redesenhar = true;
@@ -281,34 +186,116 @@ int main(void) {
 
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
-            movimentarLixeira(&lixeira);
-            exibeLixeira(lixeira);
-
-            for (int i = 0; i < max_lixos; i++) {
-                dropLixo(&lixos[i]);
-                colisao(lixos, i, max_lixos, lixeira, &pontuacao, &erros, &rodando);
+            if (estado == ESTADO_MENU) {
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela/2, altura_tela/2, ALLEGRO_ALIGN_CENTER, "SEA CLEANER");
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Aperte ENTER para jogar");
             }
+            else if (estado == ESTADO_JOGANDO) {
+                
+                exibeLixeira(lixeira, sprite_lixeiras);
 
-            al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 10, 0, "Pontos: %d", pontuacao);
-            al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 30, 0, "Erros: %d/5", erros);
+                definirFase(&lixeira, &fase, &inicio, &fim, &velocidade);
 
-            al_draw_textf(fonte, al_map_rgb(0, 0, 255), 10, 50, 0, "A = Papel");
-            al_draw_textf(fonte, al_map_rgb(255, 0, 0), 10, 60, 0, "S = Plastico");
-            al_draw_textf(fonte, al_map_rgb(0, 255, 0), 10, 70, 0, "D = Vidro");
-            al_draw_textf(fonte, al_map_rgb(255, 255, 0), 10, 80, 0, "F = Metal");
-            al_draw_textf(fonte, al_map_rgb(137, 81, 41), 10, 90, 0, "Espaco = Organico");
+                if (fase > fase_anterior) {
+                    aviso = 180;
+                    inicializaLixo(lixos, max_lixos);
+                }
+                fase_anterior = fase;
+
+                for (int i = 0; i < max_lixos; i++) {
+                    lixos[i].velocidade = velocidade;
+
+                    if (aviso == 0) {
+                        movimentarLixeira(&lixeira);
+                        moverLixo(&lixos[i]);
+                        colisao(lixos, i, max_lixos, &lixeira, &pontuacao);
+                    }
+                    
+                    dropLixo(&lixos[i], sprite_lixos);
+                    
+                }
+
+                exibeBarraLixeiras(lixeira, sprite_lixeiras, fonte);
+
+                if (lixeira.vida <= 0) {
+                    estado = ESTADO_GAMEOVER;
+                } else if (fase == 5 && lixeira.acertos >= fim) {
+                    estado = ESTADO_VITORIA;
+                }
+
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 20, 0, "Fase: %d", fase);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 30, 0, "HighScore: %d", highScore);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 50, 0, "Pontos: %d", pontuacao);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 70, 0, "Vida: %d", lixeira.vida);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 90, 0, "Lixos reciclados: %d/%d", lixeira.acertos-inicio, fim-inicio);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 100, 0, "Acertos consecutivos: %d", lixeira.combo);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 110, 0, "Multiplicador: %dX", lixeira.multiplicador);
+
+                if (aviso > 0) {
+                    al_draw_filled_rectangle(0, 0, largura_tela, altura_tela, al_map_rgba(0, 0, 0, 150));
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "STAGE %d", fase);
+                    aviso--;
+                }
+
+            }
+            else if (estado == ESTADO_GAMEOVER) {
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "GAME OVER");
+                if (pontuacao > highScore) {
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 50, ALLEGRO_ALIGN_CENTER, "NOVO RECORDE");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 90, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
+                }
+                else {
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 50, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
+                }        
+            }
+            else if (estado == ESTADO_PAUSADO) {
+                exibeLixeira(lixeira, sprite_lixeiras);
+
+                for (int i = 0; i < max_lixos; i++) {
+                    dropLixo(&lixos[i], sprite_lixos);
+                }
+
+                exibeBarraLixeiras(lixeira, sprite_lixeiras, fonte);
+
+                al_draw_filled_rectangle(0, 0, largura_tela, altura_tela, al_map_rgba(0, 0, 0, 150)); 
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "Jogo Pausado");
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 20, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para continuar jogando");
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 40, ALLEGRO_ALIGN_CENTER, "Pressione ESC para sair e voltar ao menu");
+            }
+            else if (estado == ESTADO_VITORIA) {
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "PARABÉNS, VOCE VENCEU!!!");
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 10, ALLEGRO_ALIGN_CENTER, "Voce ajudou a limpar o rio, agora as especies podem viver sem medo da extincao");
+                if (pontuacao > highScore) {
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 50, ALLEGRO_ALIGN_CENTER, "NOVO RECORDE");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 90, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
+                }
+                else {
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 50, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
+                }
+            }
 
             al_flip_display();
         }
     }
 
     printf("Sua pontuacao: %d\n", pontuacao);
+    printf("Seu combo: %d\n", lixeira.combo);
+    printf("Seu multiplicador: %d\n", lixeira.multiplicador);
 
     al_destroy_font(fonte);
     al_destroy_timer(timer);
     al_destroy_event_queue(fila_eventos);
     al_destroy_display(janela);
+    al_destroy_bitmap(sprite_lixeiras);
+    al_destroy_bitmap(sprite_lixos);
 
     return 0;
-
 }

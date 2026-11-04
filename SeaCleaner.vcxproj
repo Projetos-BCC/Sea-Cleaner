@@ -152,10 +152,19 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="colisao.c" />
+    <ClCompile Include="lixeira.c" />
+    <ClCompile Include="lixo.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="colisao.h" />
+    <ClInclude Include="configs.h" />
+    <ClInclude Include="lixeira.h" />
+    <ClInclude Include="lixo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
