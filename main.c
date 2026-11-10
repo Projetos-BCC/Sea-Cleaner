@@ -89,6 +89,7 @@ int main(void) {
     al_set_new_bitmap_flags(ALLEGRO_NO_PRESERVE_TEXTURE);
     ALLEGRO_BITMAP* sprite_lixeiras = al_load_bitmap("images/lixeiras2d.png");
     ALLEGRO_BITMAP* sprite_lixos = al_load_bitmap("images/lixos2d.png");
+    ALLEGRO_BITMAP* fundo_menu = al_load_bitmap("images/seaCleanerMenu.png");
     al_set_new_bitmap_flags(0);
 
 
@@ -100,6 +101,7 @@ int main(void) {
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
     al_register_event_source(fila_eventos, al_get_keyboard_event_source());
+    al_register_event_source(fila_eventos, al_get_mouse_event_source());
 
 
     //INICIALIZACAO DA LIXEIRA
@@ -140,13 +142,7 @@ int main(void) {
             rodando = 0;
         }
         else if (evento.type == ALLEGRO_EVENT_KEY_DOWN) {
-            if (estado == ESTADO_MENU) {
-                if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-                    reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso, &powerUp, &tempoLento, &tempoIma);
-                    estado = ESTADO_JOGANDO;
-                }
-            }
-            else if (estado == ESTADO_JOGANDO) {
+            if (estado == ESTADO_JOGANDO) {
                 trocarTipoLixeira(&lixeira, evento.keyboard.keycode);
                 if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
                     estado = ESTADO_PAUSADO;
@@ -180,6 +176,17 @@ int main(void) {
             }
             
         }
+        else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+            if (estado == ESTADO_MENU) {
+                if (evento.mouse.x > 192 && evento.mouse.x < 607 && evento.mouse.y > 463 && evento.mouse.y < 531) {
+                    if (evento.mouse.button == 1) {
+                        reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso, &powerUp, &tempoLento, &tempoIma);
+                        estado = ESTADO_JOGANDO;
+                    }
+                }
+                
+            }
+        }
         else if (evento.type == ALLEGRO_EVENT_TIMER) {
             redesenhar = true;
         }
@@ -190,8 +197,9 @@ int main(void) {
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
             if (estado == ESTADO_MENU) {
-                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela/2, altura_tela/2, ALLEGRO_ALIGN_CENTER, "SEA CLEANER");
-                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Aperte ENTER para jogar");
+                al_draw_bitmap(fundo_menu, 0, 0, 0);
+
+                
             }
             else if (estado == ESTADO_JOGANDO) {
                 
