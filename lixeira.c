@@ -3,6 +3,19 @@
 #include <string.h>
 #include <allegro5/allegro_primitives.h>
 
+void inicializarLixeira(struct Lixeira* lixeira) {
+    lixeira->largura = 100;
+    lixeira->altura = 120;
+    lixeira->x = 400;
+    lixeira->y = 700;
+    strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Papel");
+    lixeira->vida = 10;
+    lixeira->combo = 0;
+    lixeira->multiplicador = 1;
+    lixeira->acertos = 0;
+    lixeira->tempoConversao = 0;
+}
+
 void movimentarLixeira(struct Lixeira* lixeira) {
     ALLEGRO_MOUSE_STATE mouse;
     al_get_mouse_state(&mouse);

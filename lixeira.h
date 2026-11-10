@@ -14,8 +14,11 @@ struct Lixeira {
     int combo;
     int multiplicador;
     int acertos;
+    int tempoConversao;
+    char tipoConversao[10];
 };
 
+void inicializarLixeira(struct Lixeira* lixeira);
 void movimentarLixeira(struct Lixeira* lixeira);
 void trocarTipoLixeira(struct Lixeira* lixeira, int tecla);
 void exibeLixeira(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_lixeiras);
