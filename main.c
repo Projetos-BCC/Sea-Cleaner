@@ -90,6 +90,9 @@ int main(void) {
     ALLEGRO_BITMAP* sprite_lixeiras = al_load_bitmap("images/lixeiras2d.png");
     ALLEGRO_BITMAP* sprite_lixos = al_load_bitmap("images/lixos2d.png");
     ALLEGRO_BITMAP* fundo_menu = al_load_bitmap("images/seaCleanerMenu.png");
+    ALLEGRO_BITMAP* pause = al_load_bitmap("images/seaCleanerPause.png");
+    ALLEGRO_BITMAP* sprite_powerUps = al_load_bitmap("images/powerUps.png");
+    ALLEGRO_BITMAP* icone_vida = al_load_bitmap("images/iconeVida.png");
     al_set_new_bitmap_flags(0);
 
 
@@ -198,10 +201,19 @@ int main(void) {
 
             if (estado == ESTADO_MENU) {
                 al_draw_bitmap(fundo_menu, 0, 0, 0);
-
-                
             }
             else if (estado == ESTADO_JOGANDO) {
+
+                /*
+                 al_draw_scaled_bitmap(
+                    rio,
+                    0, 0,       // Posição inicial dentro do recorte
+                    251, 664,     // Tamanho original do recorte
+                    0, 0,   // Posição na tela
+                    800, 900,   // Tamanho desejado na tela
+                    0
+                );
+                */
                 
                 exibeLixeira(lixeira, sprite_lixeiras);
 
@@ -252,7 +264,7 @@ int main(void) {
                 }
 
                 if (aviso == 0) {
-                    gerarPowerUp(&powerUp, &lixeira);
+                    gerarPowerUp(&powerUp, &lixeira, fase);
                     powerUp.velocidade = velocidade;
                     moverPowerUp(&powerUp);
                     if (colidePowerUp(powerUp, lixeira)) {
@@ -260,13 +272,10 @@ int main(void) {
 
                         ativaPowerUp(powerUp, &lixeira, &tempoLento, &tempoIma);
 
-                        
-                        
-                        printf("Pegou: %s\n", powerUp.tipo);
                     }
                 }
 
-                desenhaPowerUp(powerUp);
+                desenhaPowerUp(powerUp, sprite_powerUps);
 
                 exibeBarraLixeiras(lixeira, sprite_lixeiras, fonte);
 
@@ -276,13 +285,13 @@ int main(void) {
                     estado = ESTADO_VITORIA;
                 }
 
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 20, 0, "Fase: %d", fase);
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 30, 0, "HighScore: %d", highScore);
+                exibeVida(lixeira, icone_vida);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 370, 10, 0, "Fase: %d", fase);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 670, 10, 0, "HighScore: %d", highScore);
                 al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 50, 0, "Pontos: %d", pontuacao);
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 70, 0, "Vida: %d", lixeira.vida);
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 90, 0, "Lixos reciclados: %d/%d", lixeira.acertos-inicio, fim-inicio);
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 100, 0, "Acertos consecutivos: %d", lixeira.combo);
-                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 110, 0, "Multiplicador: %dX", lixeira.multiplicador);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 70, 0, "Lixos reciclados: %d/%d", lixeira.acertos-inicio, fim-inicio);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 80, 0, "Acertos consecutivos: %d", lixeira.combo);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 90, 0, "Multiplicador: %dX", lixeira.multiplicador);
 
                 if (aviso > 0) {
                     al_draw_filled_rectangle(0, 0, largura_tela, altura_tela, al_map_rgba(0, 0, 0, 150));
@@ -312,14 +321,17 @@ int main(void) {
                     dropLixo(&lixos[i], sprite_lixos);
                 }
 
-                desenhaPowerUp(powerUp);
+                desenhaPowerUp(powerUp, sprite_powerUps);
 
                 exibeBarraLixeiras(lixeira, sprite_lixeiras, fonte);
 
-                al_draw_filled_rectangle(0, 0, largura_tela, altura_tela, al_map_rgba(0, 0, 0, 150)); 
-                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "Jogo Pausado");
-                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 20, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para continuar jogando");
-                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 40, ALLEGRO_ALIGN_CENTER, "Pressione ESC para sair e voltar ao menu");
+                exibeVida(lixeira, icone_vida);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 370, 10, 0, "Fase: %d", fase);
+                al_draw_textf(fonte, al_map_rgb(255, 255, 255), 670, 10, 0, "HighScore: %d", highScore);
+
+                al_draw_filled_rectangle(0, 0, largura_tela, altura_tela, al_map_rgba(0, 0, 0, 150));
+                al_draw_bitmap(pause, 150, 361, 0);
+
             }
             else if (estado == ESTADO_VITORIA) {
                 al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "PARABÉNS, VOCE VENCEU!!!");
@@ -347,6 +359,9 @@ int main(void) {
     al_destroy_display(janela);
     al_destroy_bitmap(sprite_lixeiras);
     al_destroy_bitmap(sprite_lixos);
+    al_destroy_bitmap(fundo_menu);
+    al_destroy_bitmap(pause);
+    al_destroy_bitmap(icone_vida);
 
     return 0;
 }

@@ -24,5 +24,6 @@ void trocarTipoLixeira(struct Lixeira* lixeira, int tecla);
 void exibeLixeira(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_lixeiras);
 void spriteLixeira(const char* tipo, float* src_x, float* src_y);
 void exibeBarraLixeiras(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_lixeiras, ALLEGRO_FONT* fonte);
+void exibeVida(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_coracoes);
 
 #endif

@@ -2,6 +2,7 @@
 #define POWERUP_H
 
 #include "lixeira.h"
+#include <allegro5/allegro.h>
 
 struct PowerUp {
 	float x, y;
@@ -12,10 +13,11 @@ struct PowerUp {
 };
 
 void inicializaPowerUp(struct PowerUp* powerUp);
-void gerarPowerUp(struct PowerUp* powerUp, struct Lixeira *lixeira);
+void gerarPowerUp(struct PowerUp* powerUp, struct Lixeira *lixeira, int fase);
 void moverPowerUp(struct PowerUp* powerUp);
 void desenhaPowerUp(struct PowerUp powerUp);
 int colidePowerUp(struct PowerUp PowerUp, struct Lixeira lixeira);
 void ativaPowerUp(struct PowerUp PowerUp, struct Lixeira* lixeira, int *tempoLento, int *tempoIma);
+void desenhaPowerUp(struct PowerUp powerUp, ALLEGRO_BITMAP* sprite_powerups);
 
 #endif
