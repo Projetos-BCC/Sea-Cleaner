@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="SeaCleaner.vcxproj" />
+  <Project Path="SeaCleaner.vcxproj" Id="b876174a-e270-4dcf-b8d6-028847a0e9b5" />
 </Solution>
