@@ -93,6 +93,7 @@ int main(void) {
     ALLEGRO_BITMAP* pause = al_load_bitmap("images/seaCleanerPause.png");
     ALLEGRO_BITMAP* sprite_powerUps = al_load_bitmap("images/powerUps.png");
     ALLEGRO_BITMAP* icone_vida = al_load_bitmap("images/iconeVida.png");
+    ALLEGRO_BITMAP* gameOver = al_load_bitmap("images/seaCleanerGameOver.png");
     al_set_new_bitmap_flags(0);
 
 
@@ -189,6 +190,18 @@ int main(void) {
                 }
                 
             }
+            else if (estado == ESTADO_GAMEOVER) {
+                if (evento.mouse.x > 213 && evento.mouse.x < 360 && evento.mouse.y > 564 && evento.mouse.y < 605) {
+                    if (evento.mouse.button == 1) {
+                        reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso, &powerUp, &tempoLento, &tempoIma);
+                        estado = ESTADO_JOGANDO;
+                    }
+                } else if (evento.mouse.x > 365 && evento.mouse.x < 493 && evento.mouse.y > 564 && evento.mouse.y < 605) {
+                    if (evento.mouse.button == 1) {
+                        estado = ESTADO_MENU;
+                    }
+                }
+            }
         }
         else if (evento.type == ALLEGRO_EVENT_TIMER) {
             redesenhar = true;
@@ -204,16 +217,16 @@ int main(void) {
             }
             else if (estado == ESTADO_JOGANDO) {
 
-                /*
-                 al_draw_scaled_bitmap(
-                    rio,
+                
+                 /*al_draw_scaled_bitmap(
+                    fundo_rio,
                     0, 0,       // Posição inicial dentro do recorte
-                    251, 664,     // Tamanho original do recorte
+                    250, 664,     // Tamanho original do recorte
                     0, 0,   // Posição na tela
                     800, 900,   // Tamanho desejado na tela
                     0
-                );
-                */
+                );*/
+                
                 
                 exibeLixeira(lixeira, sprite_lixeiras);
 
@@ -302,17 +315,18 @@ int main(void) {
             }
             else if (estado == ESTADO_GAMEOVER) {
                 al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "GAME OVER");
+                al_draw_bitmap(gameOver, 180, 210, 0);
+
                 if (pontuacao > highScore) {
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
-                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 50, ALLEGRO_ALIGN_CENTER, "NOVO RECORDE");
-                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
-                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 90, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), 386, 418, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), 478, 446, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
                 }
                 else {
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, (altura_tela / 2) + 30, ALLEGRO_ALIGN_CENTER, "Pontuação: %d", pontuacao);
-                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 50, ALLEGRO_ALIGN_CENTER, "Pressione ENTER para jogar novamente");
-                    al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
-                }        
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), 386, 418, ALLEGRO_ALIGN_CENTER, "%d", highScore);
+                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), 478, 446, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
+                }          
+              
+                
             }
             else if (estado == ESTADO_PAUSADO) {
                 exibeLixeira(lixeira, sprite_lixeiras);
