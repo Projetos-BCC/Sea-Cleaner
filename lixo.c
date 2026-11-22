@@ -1,5 +1,6 @@
 #include "lixo.h"
 #include "configs.h"
+#include "lixeira.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -93,4 +94,18 @@ void dropLixo(struct Lixo* lixo, ALLEGRO_BITMAP* sprite_lixos) {
 
 void moverLixo(struct Lixo* lixo) {
     lixo->y += lixo->velocidade;
+}
+
+void atrairLixo(struct Lixo* lixo, struct Lixeira lixeira) {
+    if (strcmp(lixo->tipo, lixeira.tipo) == 0 && lixo->y > lixeira.y - 250 && lixo->y < lixeira.y + lixeira.altura) {
+        int lixeiraC = lixeira.x + lixeira.largura / 2;
+        int lixoC = lixo->x + lixo->largura / 2;
+
+        if (lixoC < lixeiraC) {
+            lixo->x += 5;
+        }
+        else if (lixoC > lixeiraC) {
+            lixo->x -= 5;
+        }
+    }
 }

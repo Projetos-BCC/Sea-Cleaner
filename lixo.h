@@ -17,5 +17,6 @@ void tipoLixo(struct Lixo* lixo);
 void inicializaLixo(struct Lixo lixos[], int max_lixos);
 void dropLixo(struct Lixo* lixo, ALLEGRO_BITMAP* sprite_lixos);
 void moverLixo(struct Lixo* lixo);
+void atrairLixo(struct Lixo* lixo, struct Lixeira lixeira);
 
 #endif 

@@ -156,6 +156,7 @@
     <ClCompile Include="lixeira.c" />
     <ClCompile Include="lixo.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="powerup.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -165,6 +166,7 @@
     <ClInclude Include="configs.h" />
     <ClInclude Include="lixeira.h" />
     <ClInclude Include="lixo.h" />
+    <ClInclude Include="powerup.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

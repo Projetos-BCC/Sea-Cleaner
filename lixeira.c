@@ -3,6 +3,19 @@
 #include <string.h>
 #include <allegro5/allegro_primitives.h>
 
+void inicializarLixeira(struct Lixeira* lixeira) {
+    lixeira->largura = 100;
+    lixeira->altura = 120;
+    lixeira->x = 400;
+    lixeira->y = 700;
+    strcpy_s(lixeira->tipo, sizeof(lixeira->tipo), "Papel");
+    lixeira->vida = 10;
+    lixeira->combo = 0;
+    lixeira->multiplicador = 1;
+    lixeira->acertos = 0;
+    lixeira->tempoConversao = 0;
+}
+
 void movimentarLixeira(struct Lixeira* lixeira) {
     ALLEGRO_MOUSE_STATE mouse;
     al_get_mouse_state(&mouse);
@@ -119,5 +132,31 @@ void exibeBarraLixeiras(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_lixeiras,
         }
 
         al_draw_text(fonte, al_map_rgb(255, 255, 255), x + 20, y + 58, ALLEGRO_ALIGN_CENTER, teclas[i]);
+    }
+}
+
+void exibeVida(struct Lixeira lixeira, ALLEGRO_BITMAP* sprite_coracoes) {
+    int cheios = lixeira.vida / 2;
+    int meio = lixeira.vida % 2;
+
+    float celula = al_get_bitmap_width(sprite_coracoes) / 2.0f;
+    float altura = al_get_bitmap_height(sprite_coracoes);
+
+    for (int i = 0; i < cheios; i++) {
+        al_draw_scaled_bitmap(
+            sprite_coracoes,
+            0, 0, celula, altura,
+            10 + i * 40, 10, 36, 36,
+            0
+        );
+    }
+
+    if (meio == 1) {
+        al_draw_scaled_bitmap(
+            sprite_coracoes,
+            celula, 0, celula, altura,
+            10 + cheios * 40, 10, 36, 36,
+            0
+        );
     }
 }
