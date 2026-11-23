@@ -13,6 +13,6 @@ struct Especie {
 };
 
 void inicializaEspecies(struct Especie especies[]);
-void textosEnciclopedia(ALLEGRO_FONT* titulo, int maiorFase, int jogoZerado, int highscore);
+void textosEnciclopedia(ALLEGRO_FONT* titulo, int maiorFase, int jogoZerado, int highscore, ALLEGRO_BITMAP *peixes1, ALLEGRO_BITMAP* peixes2);
 
 #endif

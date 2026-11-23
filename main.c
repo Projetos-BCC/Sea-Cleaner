@@ -97,7 +97,8 @@ int main(void) {
     ALLEGRO_BITMAP* icone_vida = al_load_bitmap("images/iconeVida.png");
     ALLEGRO_BITMAP* gameOver = al_load_bitmap("images/seaCleanerGameOver.png");
     ALLEGRO_BITMAP* fundo_enciclopedia = al_load_bitmap("images/enciclopedia.png");
-
+    ALLEGRO_BITMAP* peixes1 = al_load_bitmap("images/peixes1.png");
+    ALLEGRO_BITMAP* peixes2 = al_load_bitmap("images/peixes2.png");
 
 
     ALLEGRO_EVENT_QUEUE* fila_eventos = al_create_event_queue();
@@ -134,7 +135,7 @@ int main(void) {
     struct Especie especies[9];
 
     int pontuacao = 0;
-    int highScore = 0;
+    int highScore = 1;
     int fase = 1;
     int inicio = 0;
     int fim = 30;
@@ -213,6 +214,11 @@ int main(void) {
                 } else if (evento.mouse.x > 365 && evento.mouse.x < 493 && evento.mouse.y > 564 && evento.mouse.y < 605) {
                     if (evento.mouse.button == 1) {
                         estado = ESTADO_MENU;
+                    }
+                }
+                else if (evento.mouse.x > 500 && evento.mouse.x < 616 && evento.mouse.y > 564 && evento.mouse.y < 605) {
+                    if (evento.mouse.button == 1) {
+                        estado = ESTADO_ENCICLOPEDIA;
                     }
                 }
             }
@@ -311,14 +317,12 @@ int main(void) {
                     if (fase > maiorFase) {
                         maiorFase = fase;
                     }
-                    printf("%d", maiorFase);
                 } else if (fase == 5 && lixeira.acertos >= fim) {
                     estado = ESTADO_VITORIA;
                     jogoZerado = 1;
                     if (fase > maiorFase) {
                         maiorFase = fase;
                     }
-                    printf("%d", maiorFase);
                 }
 
                 exibeVida(lixeira, icone_vida);
@@ -397,7 +401,7 @@ int main(void) {
                 al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 30, ALLEGRO_ALIGN_CENTER, "ENCICLOPEDIA");
                 al_draw_text(pontos, al_map_rgb(0, 0, 0), 400, 880, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
 
-                textosEnciclopedia(peixes, maiorFase, jogoZerado, highScore);
+                textosEnciclopedia(peixes, maiorFase, jogoZerado, highScore, peixes1, peixes2);
             }
 
             al_flip_display();
@@ -415,6 +419,10 @@ int main(void) {
     al_destroy_bitmap(fundo_menu);
     al_destroy_bitmap(pause);
     al_destroy_bitmap(icone_vida);
+    al_destroy_bitmap(gameOver);
+    al_destroy_bitmap(fundo_enciclopedia);
+    al_destroy_bitmap(peixes1);
+    al_destroy_bitmap(peixes2);
 
     return 0;
 }

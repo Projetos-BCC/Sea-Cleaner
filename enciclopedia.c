@@ -5,6 +5,7 @@
 
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_image.h>
 
 void inicializaEspecies(struct Especie especies[]) {
 
@@ -73,75 +74,221 @@ void inicializaEspecies(struct Especie especies[]) {
 
 }
 
-void textosEnciclopedia(ALLEGRO_FONT* titulo, int maiorFase, int jogoZerado, int highscore) {
+void textosEnciclopedia(ALLEGRO_FONT* titulo, int maiorFase, int jogoZerado, int highscore, ALLEGRO_BITMAP* peixes1, ALLEGRO_BITMAP* peixes2) {
     //TEXTO PEIXES
     if (maiorFase >= 2) {
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 178, 338, ALLEGRO_ALIGN_CENTER, "ANDIRA");
+        al_draw_scaled_bitmap(
+                    peixes1,
+                    70, 21,       // Posição inicial dentro do recorte
+                    206, 86,     // Tamanho original do recorte
+                    113, 201,   // Posição na tela
+                    136, 65,   // Tamanho desejado na tela
+                    0
+                );
     }
     else {
+        al_draw_tinted_scaled_bitmap(
+            peixes1,
+            al_map_rgb(0, 0, 0),
+            70, 21,       // Posição inicial dentro do recorte
+            206, 86,     // Tamanho original do recorte
+            113, 201,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 178, 338, ALLEGRO_ALIGN_CENTER, "FASE 2");
     }
     
     if (maiorFase >= 3) {
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 338, ALLEGRO_ALIGN_CENTER, "BARRIGUDO");
+        al_draw_scaled_bitmap(
+            peixes1,
+            336, 34,       // Posição inicial dentro do recorte
+            220, 61,     // Tamanho original do recorte
+            335, 201,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
     }
     else {
+        al_draw_tinted_scaled_bitmap(
+            peixes1,
+            al_map_rgb(0, 0, 0),
+            336, 34,       // Posição inicial dentro do recorte
+            220, 61,     // Tamanho original do recorte
+            335, 201,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 338, ALLEGRO_ALIGN_CENTER, "FASE 3");
     }
 
     if (maiorFase >= 4) {
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 622, 338, ALLEGRO_ALIGN_CENTER, "CANIVETE");
+        al_draw_scaled_bitmap(
+            peixes1,
+            311, 231,       // Posição inicial dentro do recorte
+            249, 71,     // Tamanho original do recorte
+            557, 201,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
     }
     else {
+        al_draw_tinted_scaled_bitmap(
+            peixes1,
+            al_map_rgb(0, 0, 0),
+            311, 231,       // Posição inicial dentro do recorte
+            249, 71,     // Tamanho original do recorte
+            557, 201,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 622, 338, ALLEGRO_ALIGN_CENTER, "FASE 4");
     }
 
     if (jogoZerado == 1) {
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 178, 575, ALLEGRO_ALIGN_CENTER, "LAMBARI");
+        al_draw_scaled_bitmap(
+            peixes1,
+            56, 128,       // Posição inicial dentro do recorte
+            185, 74,     // Tamanho original do recorte
+            113, 438,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
     }
     else {
+        al_draw_tinted_scaled_bitmap(
+            peixes1,
+            al_map_rgb(0, 0, 0),
+            56, 128,       // Posição inicial dentro do recorte
+            185, 74,     // Tamanho original do recorte
+            113, 438,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 178, 575, ALLEGRO_ALIGN_CENTER, "ZERAR");
     }
 
     if (highscore >= 128) {
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 575, ALLEGRO_ALIGN_CENTER, "DOURADA");
+        al_draw_scaled_bitmap(
+            peixes1,
+            60, 215,       // Posição inicial dentro do recorte
+            204, 84,     // Tamanho original do recorte
+            335, 438,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
     }
     else {
-        al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 575, ALLEGRO_ALIGN_CENTER, "128 PONTOS");
-    }
-
-    if (highscore >= 128) {
-        al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 575, ALLEGRO_ALIGN_CENTER, "DOURADA");
-    }
-    else {
+        al_draw_tinted_scaled_bitmap(
+            peixes1,
+            al_map_rgb(0, 0, 0),
+            60, 215,       // Posição inicial dentro do recorte
+            204, 84,     // Tamanho original do recorte
+            335, 438,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 575, ALLEGRO_ALIGN_CENTER, "128 PONTOS");
     }
 
     if (highscore >= 448) {
+        al_draw_scaled_bitmap(
+            peixes2,
+            209, 42,       // Posição inicial dentro do recorte
+            192, 97,     // Tamanho original do recorte
+            557, 438,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 622, 575, ALLEGRO_ALIGN_CENTER, "PIRARARA");
     }
     else {
+        al_draw_tinted_scaled_bitmap(
+            peixes2,
+            al_map_rgb(0, 0, 0),
+            209, 42,       // Posição inicial dentro do recorte
+            192, 97,     // Tamanho original do recorte
+            557, 438,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 622, 575, ALLEGRO_ALIGN_CENTER, "448 PONTOS");
     }
 
     if (highscore >= 848) {
+        al_draw_scaled_bitmap(
+            peixes2,
+            413, 48,       // Posição inicial dentro do recorte
+            192, 85,     // Tamanho original do recorte
+            113, 679,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 178, 816, ALLEGRO_ALIGN_CENTER, "PIRAIBA");
     }
     else {
+        al_draw_tinted_scaled_bitmap(
+            peixes2,
+            al_map_rgb(0, 0, 0),
+            413, 48,       // Posição inicial dentro do recorte
+            192, 85,     // Tamanho original do recorte
+            113, 679,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 178, 816, ALLEGRO_ALIGN_CENTER, "848 PONTOS");
     } 
     
     if (highscore >= 1328) {
+        al_draw_scaled_bitmap(
+            peixes1,
+            191, 303,       // Posição inicial dentro do recorte
+            230, 89,     // Tamanho original do recorte
+            335, 679,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 816, ALLEGRO_ALIGN_CENTER, "PINTADO");
     }
     else {
+        al_draw_tinted_scaled_bitmap(
+            peixes1,
+            al_map_rgb(0, 0, 0),
+            191, 303,       // Posição inicial dentro do recorte
+            230, 89,     // Tamanho original do recorte
+            335, 679,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 816, ALLEGRO_ALIGN_CENTER, "1328 PONTOS");
     }
 
     if (highscore >= 1888) {
+        al_draw_scaled_bitmap(
+            peixes2,
+            210, 172,       // Posição inicial dentro do recorte
+            192, 67,     // Tamanho original do recorte
+            557, 679,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 622, 816, ALLEGRO_ALIGN_CENTER, "PIRARUCU");
     }
     else {
+        al_draw_tinted_scaled_bitmap(
+            peixes2,
+            al_map_rgb(0, 0, 0),
+            210, 172,       // Posição inicial dentro do recorte
+            192, 67,     // Tamanho original do recorte
+            557, 679,   // Posição na tela
+            136, 65,   // Tamanho desejado na tela
+            0
+        );
         al_draw_text(titulo, al_map_rgb(0, 0, 0), 622, 816, ALLEGRO_ALIGN_CENTER, "1888 PONTOS");
     }
 }
