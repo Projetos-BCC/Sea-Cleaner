@@ -1,6 +1,7 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include <allegro5/allegro_image.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,7 @@
 #include "lixo.h"
 #include "colisao.h"
 #include "powerup.h"
+#include "enciclopedia.h"
 
 estadoJogo estado = ESTADO_MENU;
 
@@ -63,13 +65,13 @@ void definirFase(struct Lixeira* lixeira, int *fase, int *inicio, int *fim, int 
         *fase = 4;
         *inicio = 120;
         *fim = 180;
-        *velocidade = 6;
+        *velocidade = 5.5;
     }
     if (lixeira->acertos >= 180) {
         *fase = 5;
         *inicio = 180;
         *fim = 250;
-        *velocidade = 7;
+        *velocidade = 6;
     }
 }
 
@@ -81,12 +83,12 @@ int main(void) {
     al_install_mouse();
     al_install_keyboard();
     al_init_font_addon();
+    al_init_ttf_addon();
     al_init_image_addon();
 
     ALLEGRO_DISPLAY* janela = al_create_display(largura_tela, altura_tela);
 
     //INICIALIZACAO DOS SPRITES
-    al_set_new_bitmap_flags(ALLEGRO_NO_PRESERVE_TEXTURE);
     ALLEGRO_BITMAP* sprite_lixeiras = al_load_bitmap("images/lixeiras2d.png");
     ALLEGRO_BITMAP* sprite_lixos = al_load_bitmap("images/lixos2d.png");
     ALLEGRO_BITMAP* fundo_menu = al_load_bitmap("images/seaCleanerMenu.png");
@@ -94,13 +96,18 @@ int main(void) {
     ALLEGRO_BITMAP* sprite_powerUps = al_load_bitmap("images/powerUps.png");
     ALLEGRO_BITMAP* icone_vida = al_load_bitmap("images/iconeVida.png");
     ALLEGRO_BITMAP* gameOver = al_load_bitmap("images/seaCleanerGameOver.png");
-    al_set_new_bitmap_flags(0);
+    ALLEGRO_BITMAP* fundo_enciclopedia = al_load_bitmap("images/enciclopedia.png");
+
 
 
     ALLEGRO_EVENT_QUEUE* fila_eventos = al_create_event_queue();
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
-    ALLEGRO_FONT* fonte = al_create_builtin_font();
-    
+
+    //TAMANHO DOS TEXTOS
+    ALLEGRO_FONT* fonte = al_load_ttf_font("font/fonte.ttf", 8, 0);
+    ALLEGRO_FONT* peixes = al_load_ttf_font("font/fonte.ttf", 10, 0);
+    ALLEGRO_FONT* pontos = al_load_ttf_font("font/fonte.ttf", 16, 0);
+    ALLEGRO_FONT* titulo = al_load_ttf_font("font/fonte.ttf", 24, 0);
 
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
@@ -123,6 +130,9 @@ int main(void) {
     struct PowerUp powerUp;
     inicializaPowerUp(&powerUp);
 
+    //INICIALIZACAO DOS PEIXES
+    struct Especie especies[9];
+
     int pontuacao = 0;
     int highScore = 0;
     int fase = 1;
@@ -133,6 +143,8 @@ int main(void) {
     int aviso = 0;
     int tempoLento = 0;
     int tempoIma = 0;
+    int jogoZerado = 0;
+    int maiorFase = 1;
 
     al_start_timer(timer);
     int rodando = 1;
@@ -160,7 +172,8 @@ int main(void) {
                     pontuacao = 0;
                     estado = ESTADO_MENU;
                 }
-            } else if (estado == ESTADO_GAMEOVER) {
+            } 
+            else if (estado == ESTADO_VITORIA) {
                 if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
                     reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso, &powerUp, &tempoLento, &tempoIma);
                     estado = ESTADO_JOGANDO;
@@ -169,12 +182,8 @@ int main(void) {
                     estado = ESTADO_MENU;
                 }
             }
-            else if (estado == ESTADO_VITORIA) {
-                if (evento.keyboard.keycode == ALLEGRO_KEY_ENTER) {
-                    reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso, &powerUp, &tempoLento, &tempoIma);
-                    estado = ESTADO_JOGANDO;
-                }
-                else if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+            else if (estado == ESTADO_ENCICLOPEDIA) {
+                if (evento.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
                     estado = ESTADO_MENU;
                 }
             }
@@ -186,6 +195,11 @@ int main(void) {
                     if (evento.mouse.button == 1) {
                         reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso, &powerUp, &tempoLento, &tempoIma);
                         estado = ESTADO_JOGANDO;
+                    }
+                } else if (evento.mouse.x > 192 && evento.mouse.x < 607 && evento.mouse.y > 550 && evento.mouse.y < 618) {
+                    if (evento.mouse.button == 1) {
+                        reiniciarPartida(&pontuacao, &lixeira, lixos, max_lixos, &highScore, &aviso, &powerUp, &tempoLento, &tempoIma);
+                        estado = ESTADO_ENCICLOPEDIA;
                     }
                 }
                 
@@ -294,8 +308,17 @@ int main(void) {
 
                 if (lixeira.vida <= 0) {
                     estado = ESTADO_GAMEOVER;
+                    if (fase > maiorFase) {
+                        maiorFase = fase;
+                    }
+                    printf("%d", maiorFase);
                 } else if (fase == 5 && lixeira.acertos >= fim) {
                     estado = ESTADO_VITORIA;
+                    jogoZerado = 1;
+                    if (fase > maiorFase) {
+                        maiorFase = fase;
+                    }
+                    printf("%d", maiorFase);
                 }
 
                 exibeVida(lixeira, icone_vida);
@@ -314,16 +337,15 @@ int main(void) {
 
             }
             else if (estado == ESTADO_GAMEOVER) {
-                al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2, ALLEGRO_ALIGN_CENTER, "GAME OVER");
                 al_draw_bitmap(gameOver, 180, 210, 0);
 
                 if (pontuacao > highScore) {
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), 386, 418, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), 478, 446, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
+                    al_draw_textf(pontos, al_map_rgb(255, 255, 255), 398, 413, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
+                    al_draw_textf(pontos, al_map_rgb(255, 255, 255), 488, 441, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
                 }
                 else {
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), 386, 418, ALLEGRO_ALIGN_CENTER, "%d", highScore);
-                    al_draw_textf(fonte, al_map_rgb(255, 255, 255), 478, 446, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
+                    al_draw_textf(pontos, al_map_rgb(255, 255, 255), 398, 413, ALLEGRO_ALIGN_CENTER, "%d", highScore);
+                    al_draw_textf(pontos, al_map_rgb(255, 255, 255), 488, 441, ALLEGRO_ALIGN_CENTER, "%d", pontuacao);
                 }          
               
                 
@@ -362,12 +384,29 @@ int main(void) {
                     al_draw_text(fonte, al_map_rgb(255, 255, 255), largura_tela / 2, altura_tela / 2 + 70, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
                 }
             }
+            else if (estado == ESTADO_ENCICLOPEDIA) {
+                al_draw_scaled_bitmap(
+                    fundo_enciclopedia,
+                    0, 0, 
+                    500, 550, 
+                    0, 0,
+                    800, 900,
+                    0
+                );
+
+                al_draw_text(titulo, al_map_rgb(0, 0, 0), 400, 30, ALLEGRO_ALIGN_CENTER, "ENCICLOPEDIA");
+                al_draw_text(pontos, al_map_rgb(0, 0, 0), 400, 880, ALLEGRO_ALIGN_CENTER, "Pressione ESC para voltar ao menu");
+
+                textosEnciclopedia(peixes, maiorFase, jogoZerado, highScore);
+            }
 
             al_flip_display();
         }
     }
 
     al_destroy_font(fonte);
+    al_destroy_font(pontos);
+    al_destroy_font(titulo);
     al_destroy_timer(timer);
     al_destroy_event_queue(fila_eventos);
     al_destroy_display(janela);

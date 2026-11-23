@@ -153,6 +153,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="colisao.c" />
+    <ClCompile Include="enciclopedia.c" />
     <ClCompile Include="lixeira.c" />
     <ClCompile Include="lixo.c" />
     <ClCompile Include="main.c" />
@@ -164,6 +165,7 @@
   <ItemGroup>
     <ClInclude Include="colisao.h" />
     <ClInclude Include="configs.h" />
+    <ClInclude Include="enciclopedia.h" />
     <ClInclude Include="lixeira.h" />
     <ClInclude Include="lixo.h" />
     <ClInclude Include="powerup.h" />
